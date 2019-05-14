@@ -98,9 +98,9 @@ namespace VoiceCallApplication
         {
             
 
-            xmlClient = new ASXMLClient();
+            xmlClient = Program.globalCom.xmlClient;
             //Initializes a new instance of AgileSoftware.Developer.ASXMLClient class. 
-            xmlStation = new ASXMLStation();
+            xmlStation = Program.globalCom.xmlStation;
             //Initializes a new instance of AgileSoftware.Developer.ASXMLStation class. 
             InitializeComponent();
             
@@ -127,7 +127,7 @@ namespace VoiceCallApplication
             xmlClient.StreamConnected += new EventHandler(xmlClient_StreamConnected);
 
             //xmlClient.CSTAGetAgentStateResponse += new CSTAGetAgentStateResponseEventHandler(xmlClient_CSTAGetAgentStateResponse);
-            xmlClient.CSTAAgentLoggedOn += new CSTAAgentLoggedOnEventHandler(xmlClient_CSTAAgentLoggedOn);
+            //xmlClient.CSTAAgentLoggedOn += new CSTAAgentLoggedOnEventHandler(xmlClient_CSTAAgentLoggedOn);
 
             
             
@@ -157,8 +157,8 @@ namespace VoiceCallApplication
             xmlStation.MonitorStarted += new EventHandler(xmlStation_MonitorStarted);
             xmlStation.MonitorStopped += new EventHandler(xmlStation_MonitorStopped);
 
-            Program.globalCom.xmlClient = xmlClient;
-            Program.globalCom.xmlStation = xmlStation;
+            //Program.globalCom.xmlClient = xmlClient;
+            //Program.globalCom.xmlStation = xmlStation;
 
             Application.ApplicationExit += new EventHandler(Application_ApplicationExit);
 

@@ -30,7 +30,7 @@ namespace VoiceCallApplication
         {
             log.Info("Agent " + arg.AgentID + " Logged Off");
             agent_state = AgentState.agentLoggedOff;
-            
+
         }
 
         private void AgentLoggenOn()
@@ -43,52 +43,89 @@ namespace VoiceCallApplication
 
         }
 
+        // huy
         void xmlClient_CSTAAgentLoggedOn(object sender, CSTAAgentLoggedOnEventArgs arg)
         {
             //rtbStatus.Text = "Agent Logged On";
             log.Info("Agent  " + arg.AgentID + " Logged On");
             agent_state = AgentState.agentLoggedOn;
             AgentLoggenOn();
-            xmlClient.CSTAGetAgentState(new CSTADeviceID(lblStation.Text.Trim(), enDeviceIDType.deviceNumber));
+            xmlClient.CSTAGetAgentState(new CSTADeviceID(lbAgentID.Text.Trim(), enDeviceIDType.deviceNumber));
+        }
+
+        private void XmlStation_AgentGetStateReturn(object sender, AgentGetStateReturnEventArgs arg)
+        {
+            var agent = arg.AgentReturned;
+            var state = agent.AgentState;
+
+            lbAgentID.Text = agent.AgentID;
+            lbAgtName.Text = agent.AgentName;
+            log.Debug("-- Agent State :"+state.ToString());
+
+            if (state == enStationAgentState.agentNotReady)
+            {
+                log.Info("Agent State : Aux");
+                agent_state = AgentState.agentNotReady;
+                log.Debug("-- Reason: "+ agent.ReasonCode);
+                log.Debug("-- Pending: " + agent.PendingReasonCode);
+                AgentNotReady();
+            }
+            else if (state == enStationAgentState.agentReady)
+            {
+                log.Info("Agent State : Avaiable");
+                agent_state = AgentState.agentReady;
+                log.Debug("-- Reason: " + agent.ReasonCode);
+                log.Debug("-- Pending: " + agent.PendingReasonCode);
+                AgentReady();
+            }
+
         }
 
         void xmlClient_CSTAGetAgentStateResponse(object sender, CSTAGetAgentStateResponseEventArgs arg)
         {
+
             //logged_state - Stores Agent State
+
             bool logged_state = arg.AgentStateList[0].LoggedOnState;
             if (logged_state)
             {
                 //state - gets and stores Agent State
                 string state = arg.AgentStateList[0].AgentInfo[0].AgentState.ToString();
                 string myAgentID = arg.AgentStateList[0].AgentID;
+
                 if (state.Equals("agentNotReady"))
                 {
-                   
+
                     log.Info("Agent State : Aux");
-                    lblStation.Text = myAgentID;
-                    agent_state = AgentState.agentNotReady;
+                    int code = arg.PrivateData.AgentPrivateData[0].AgentPrivateIno[0].ReasonCode;
+                    log.Debug("Code: " + code);
+                    //lblAgentID.Text = myAgentID;
+                    //lbAgtName.Text = agentName;
+                    //agent_state = AgentState.agentNotReady;
+
                     //AgentNotReady();
                 }
-                else if (state.Equals("agentReady"))
-                {
-                   
-                    log.Info("Agent State : Available");
-                    lblStation.Text = myAgentID;
-                    agent_state = AgentState.agentReady;
-                    //AgentReady();
-                }
-                else if (state.Equals("agentWorkingAfterCall"))
-                {
-                    log.Info("Agent State : ACW");
-                    lblStation.Text = myAgentID;
-                    agent_state = AgentState.agentWorkingAfterCall;
-                    //AgentWorkingAfterCall();
-                }
-                else
-                {
-                    MessageBox.Show(arg.AgentStateList[0].AgentInfo[0].AgentState.ToString());
-                }
+                //else if (state.Equals("agentReady"))
+                //{
+
+                //    log.Info("Agent State : Available");
+                //    lblAgentID.Text = myAgentID;
+                //    agent_state = AgentState.agentReady;
+                //    //AgentReady();
+                //}
+                //else if (state.Equals("agentWorkingAfterCall"))
+                //{
+                //    log.Info("Agent State : ACW");
+                //    lblAgentID.Text = myAgentID;
+                //    agent_state = AgentState.agentWorkingAfterCall;
+                //    //AgentWorkingAfterCall();
+                //}
+                //else
+                //{
+                //    MessageBox.Show(arg.AgentStateList[0].AgentInfo[0].AgentState.ToString());
+                //}
             }
+
         }
 
 
@@ -136,8 +173,8 @@ namespace VoiceCallApplication
         //Connection Disconnected
         private void ConnectionDisconnected()
         {
-           
-            
+
+
             //Image img = Image.FromFile(@"..\..\Resources\images\login.png");
             //lblAgentID.Enabled = false;
             //lblAgentPassword.Enabled = false;
@@ -156,12 +193,31 @@ namespace VoiceCallApplication
             btnLogin.Enabled = true;
             btnLogout.Enabled = false;
             //txtbAgentPassword.Clear();
-            //txtbStationID.Clear();
-            ////lblStation.Text = "";
+            lbAgtName.Text = "";
+            lbAgentID.Text = "";
             //btnConnect.Enabled = true;
             //myToolTip.SetToolTip(btnConnect, "Connect to XML Server");
             //gbAgentDetails.Enabled = false;
             //gbTelephony.Enabled = false;
+        }
+
+        private void AgentNotReady()
+        {
+            //Image img = Image.FromFile(@"..\..\Resources\images\logout.png");
+            //btnLogin.Image = img;
+            btnLogin.Enabled = false;
+            //myToolTip.SetToolTip(btnLogin, "Agent Logout");
+            btnAux.Enabled = false;
+            txtStatus.Text = "Logged On";
+            //btnACW.Enabled = true;
+            btnAvailable.Enabled = true;
+        }
+
+        private void AgentReady()
+        {
+            btnAvailable.Enabled = false;
+            txtStatus.Text = "Avaiable";
+
         }
 
     }

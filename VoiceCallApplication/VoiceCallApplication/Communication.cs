@@ -13,6 +13,10 @@ namespace VoiceCallApplication
         public ASXMLClient xmlClient;
         public ASXMLStation xmlStation;
 
+        public string agentID { get; set; }
+        public string agentPassword { get; set; }
+        public string stationDN { get; set; }
+
         public bool Connected
         {
             get

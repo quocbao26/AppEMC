@@ -24,7 +24,19 @@ namespace VoiceCallApplication
     public partial class SettingConfigForm : Form
     {
 
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            getLink();
+        }
+
+
         private void btnBrowse_Click(object sender, EventArgs e)
+        {
+            getLink();
+        }
+
+        void getLink()
         {
             cmbServerLink.Items.Clear();
             if ((txtbServerIP.Text.Length <= 0) && (txtbServerPort.Text.Length <= 0))
@@ -70,7 +82,7 @@ namespace VoiceCallApplication
                 }
                 else
                 {
-                  //  MessageBox.Show(_ip + "-" + _no, "Port", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    //  MessageBox.Show(_ip + "-" + _no, "Port", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     xmlClient.ServerIP = txtbServerIP.Text.Trim();
                     xmlClient.ServerPort = int.Parse(txtbServerPort.Text.Trim());
                     xmlClient.XMLEnumerateServices();
@@ -94,6 +106,8 @@ namespace VoiceCallApplication
             }
             LinksBrowsed();
         }
+
+       
 
         private void btnConnect_Click(object sender, EventArgs e)
         {
@@ -159,7 +173,8 @@ namespace VoiceCallApplication
                     {
                         xmlStation.StationDN = txtbStationID.Text.Trim();
                         xmlStation.CSTASource = xmlClient;
-                        //ConnectionDisconnected();
+                        ConnectionDisconnected();
+                        Program.globalCom.stationDN = txtbStationID.Text.Trim();
                     }
                     else
                     {
@@ -191,7 +206,7 @@ namespace VoiceCallApplication
         void xmlStation_MonitorStarted(object sender, EventArgs e)
         {
             monitor_state = MonitorState.MonitorStart;
-            string myStation = txtbStationID.Text.Trim();
+             string myStation = txtbStationID.Text.Trim();
             CSTADeviceID myDevice = new CSTADeviceID(myStation, enDeviceIDType.deviceNumber);
             xmlClient.CSTAGetAgentState(myDevice);
             connectAgent();
@@ -202,7 +217,8 @@ namespace VoiceCallApplication
         void xmlStation_MonitorStopped(object sender, EventArgs e)
         {
             log.Info("Monitor Stopped");
-            monitor_state = MonitorState.MonitorStop;           
+            monitor_state = MonitorState.MonitorStop;     
+           
         }
 
 
@@ -214,6 +230,7 @@ namespace VoiceCallApplication
             ConnectionEstablished();
             loginStation();
             
+            
         }
 
         void xmlClient_SocketConnected(object sender, EventArgs e)
@@ -221,55 +238,6 @@ namespace VoiceCallApplication
             //rtbStatus.Text = "Socket Connected.";
             log.Info("Socket Connected");
         }
-
-
-        void agentLogin()
-        {
-            if (agent_state == AgentState.agentLoggedOff)
-            {
-                if (txtbAgentID.Text.Length > 0)
-                {
-                    string ag_id = txtbAgentID.Text;
-                    bool isagentID = checkNum(ag_id);
-                    if (isagentID)
-                    {
-                        if (txtbAgentPassword.Text.Length > 0)
-                        {
-                            string ag_pwd = txtbAgentPassword.Text;
-                            bool isagentpwd = checkNum(ag_pwd);
-                            if (isagentpwd)
-                            {
-                                xmlClient.CSTASetAgentState(new CSTADeviceID(txtbStationID.Text.Trim(), enDeviceIDType.deviceNumber), enReqAgentState.loggedOn, txtbAgentID.Text.Trim(), txtbAgentPassword.Text.Trim(), null, null);
-                            }
-                            else
-                            {
-                                MessageBox.Show("Invalid Agent Password", "Password", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                log.Error("Invalid agent Password entered");
-                                txtbAgentPassword.Focus();
-                            }
-                        }
-                        else
-                        {
-                            xmlClient.CSTASetAgentState(new CSTADeviceID(txtbStationID.Text.Trim(), enDeviceIDType.deviceNumber), enReqAgentState.loggedOn, txtbAgentID.Text.Trim(), txtbAgentPassword.Text.Trim(), null, null);
-                        }
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Agent ID not entered", "Agent ID", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    log.Error("Agent ID not entered");
-                    txtbAgentID.Focus();
-                }
-            }
-
-            //Agent Logout
-            if (agent_state == AgentState.agentLoggedOn || agent_state == AgentState.agentReady || agent_state == AgentState.agentNotReady || agent_state == AgentState.agentWorkingAfterCall)
-            {
-                xmlClient.CSTASetAgentState(new CSTADeviceID(txtbStationID.Text.Trim(), enDeviceIDType.deviceNumber), enReqAgentState.loggedOff, txtbAgentID.Text.Trim(), txtbAgentPassword.Text.Trim(), null, null);
-            }
-        }
-       
-
 
 
         //Connection Established
@@ -285,7 +253,7 @@ namespace VoiceCallApplication
             btnConnect.Enabled = false;
             Program.globalCom.Connected = true;
             
-            //this.Visible = false;
+            this.Visible = false;
             //myToolTip.SetToolTip(btnConnect, "Disconnect from XML Server");
             //gbAgentDetails.Enabled = true;
 

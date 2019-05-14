@@ -242,7 +242,7 @@
         R+DAjZamo9GVcQkr5PLbVitqm42dKMw+oRhV6FpzXSg88C/37mmJ4abPJwAAAABJRU5ErkJggg==
 </value>
   </data>
-  <data name="btnFinish.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+  <data name="btnAux.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAABYAAAAXCAIAAACAiijJAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
         wwAADsMBx2+oZAAAAd5JREFUOE+lUiFv4zAU9l8JO3hhOzizHqulAzs2GU2HTkbVNFJZBdVQZDRwIJIH
@@ -347,4 +347,7 @@
         auGaVNvVUxP1rxlul9v//7T7g8Uu/zeoIXQ31BCyBvA3mqWAvsiOL7EAAAAASUVORK5CYII=
 </value>
   </data>
+  <metadata name="toolStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>154, 17</value>
+  </metadata>
 </root>

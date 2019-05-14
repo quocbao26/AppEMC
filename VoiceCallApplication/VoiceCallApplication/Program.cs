@@ -22,6 +22,7 @@ namespace VoiceCallApplication
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new VoiceCallForm());
+
         }
     }
 }

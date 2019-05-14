@@ -1,5 +1,6 @@
 ﻿using AgileSoftware.Developer;
 using AgileSoftware.Developer.CSTA;
+using AgileSoftware.Developer.CSTA.PrivateData;
 using AgileSoftware.Developer.Station;
 using AgileSoftware.Developer.XML;
 using log4net;
@@ -23,6 +24,8 @@ namespace VoiceCallApplication
         ASXMLStation xmlStation;
         enASXMLClientError err;
         SettingConfigForm f = null;
+        Communication comm;
+        
         
         //Call varialbles
         string incoming_call_id = null, make_call_id = null;
@@ -54,6 +57,7 @@ namespace VoiceCallApplication
             Connect,
             Disconnect
         };
+
         Connection connectionState = Connection.Disconnect;
 
         //Enumeration to maintain Agent State
@@ -65,6 +69,7 @@ namespace VoiceCallApplication
             agentLoggedOff,
             agentWorkingAfterCall
         };
+
         AgentState agent_state = AgentState.agentLoggedOff;
 
         //Enumeration to maintain Monitor State
@@ -83,6 +88,11 @@ namespace VoiceCallApplication
             CompleteConsult
         };
         Consult_Type _type;
+
+        private void btnAux_Click(object sender, EventArgs e)
+        {
+
+        }
 
         //Log File is generated that stores log entries of the application. It is stored in the same directory with the name: AgentLoginForm.log
         public static readonly ILog log = LogManager.GetLogger(typeof(SettingConfigForm));
@@ -107,10 +117,25 @@ namespace VoiceCallApplication
                 log.Info("Initialized Voice Handling Application");
             }
                
-            //buildEventHandlers();
+            buildEventHandlers();
 
            
         }
+
+        private void btnAvailable_Click(object sender, EventArgs e)
+        {
+            xmlStation.AgentSetState(enReqAgentState.ready, comm.agentID, comm.agentPassword, enWorkMode.WM_AUTO_IN,0);
+
+        }
+
+        private void btnLogout_Click(object sender, EventArgs e)
+        {
+            disconnect();
+            txtStatus.Text = "Logged Off";
+            btnAvailable.Enabled = false;
+            
+        }
+
         private Form CheckExists(Type ftype)
         {
             FormCollection fc = Application.OpenForms;
@@ -121,47 +146,69 @@ namespace VoiceCallApplication
         }
         private void btnLogin_Click(object sender, EventArgs e)
         {
-            Form frm = this.CheckExists(typeof(SettingConfigForm));
+            Program.globalCom.xmlClient = xmlClient;
+            Program.globalCom.xmlStation = xmlStation;
+            //Form frm = this.CheckExists(typeof(SettingConfigForm));
 
-            if (frm != null) frm.Activate();
+            if (f != null)
+            {
+                f.Activate();
+            }
             else
             {
                 f = new SettingConfigForm();
+                f.VisibleChanged += Frm_VisibleChanged; 
                 //f.MdiParent = this;
-                buildEventHandlers();   
+                //buildEventHandlers();
                 f.ShowDialog();
-                
+
             }
-            MessageBox.Show(xmlClient.ServerIP + "-" + xmlClient.ServerPort);
-            MessageBox.Show(xmlStation.StationDN);
+            //MessageBox.Show(xmlClient.ServerIP + "-" + xmlClient.ServerPort);
+            //MessageBox.Show(xmlStation.StationDN);
         }
 
 
-        void f_VisibleChanged(object sender, EventArgs e)
+
+
+
+        private void Frm_VisibleChanged(object sender, EventArgs e)
         {
-            if (!this.Visible && Program.globalCom.Connected == true) {
+            if (!f.Visible && Program.globalCom.Connected == true) {
                 btnLogout.Enabled = true;
+                xmlStation.AgentGetState();
+                comm = Program.globalCom;
+                //xmlClient.CSTAGetAgentState(new CSTADeviceID(xmlStation.StationDN, enDeviceIDType.deviceNumber));
             }
         }
 
         private void buildEventHandlers()
         {
-            xmlClient = Program.globalCom.xmlClient;
+            //xmlClient = Program.globalCom.xmlClient;
             
-            xmlStation = Program.globalCom.xmlStation;
-           
-            f.VisibleChanged += new EventHandler(f_VisibleChanged);
+            //xmlStation = Program.globalCom.xmlStation;
+
+            //IEnumerator<StationAgentList> agentList = xmlStation.StationAgents.Cast<StationAgentList>().GetEnumerator();
+            //while (agentList.MoveNext())
+            //{
+            //    StationAgent agent = agentList.Current.Cast<StationAgent>().First();
+            //    string st = agent.AgentName;
+            //}
+
             //if(f!=null) f.connectSuccessfully += new EventHandler(activeLogout);
 
             //xmlClient.XMLEnumerateServicesReturned += new XMLEnumerateServicesReturnedEventHandler(Program.globalCom.xmlClient.XMLEnumerateServicesReturned);
             //xmlClient.SocketConnected += new EventHandler(xmlClient_SocketConnected);
             //xmlClient.StreamConnected += new EventHandler(xmlClient_StreamConnected);
 
-            xmlClient.CSTAGetAgentStateResponse += new CSTAGetAgentStateResponseEventHandler(xmlClient_CSTAGetAgentStateResponse);
-            xmlClient.CSTAAgentLoggedOn += new CSTAAgentLoggedOnEventHandler(xmlClient_CSTAAgentLoggedOn);
+            //StationAgentList
+            //IEnumerator<StationAgentList> agentList = xmlStation.StationAgents.Cast<StationAgentList>().GetEnumerator();
 
-            //StationAgentList 
-            IEnumerator<StationAgentList> agentList = xmlStation.StationAgents.Cast<StationAgentList>().GetEnumerator();
+            xmlClient.CSTAGetAgentStateResponse += new CSTAGetAgentStateResponseEventHandler(xmlClient_CSTAGetAgentStateResponse);
+            xmlStation.AgentGetStateReturn += XmlStation_AgentGetStateReturn;
+            //xmlClient.CSTAAgentLoggedOn += new CSTAAgentLoggedOnEventHandler(xmlClient_CSTAAgentLoggedOn);
+
+
+
 
 
             //xmlClient.CSTAAgentLoggedOff += new CSTAAgentLoggedOffEventHandler(xmlClient_CSTAAgentLoggedOff);
@@ -187,16 +234,55 @@ namespace VoiceCallApplication
             //xmlStation.MonitorStopped += new EventHandler(xmlStation_MonitorStopped);
 
             Application.ApplicationExit += new EventHandler(Application_ApplicationExit);
-            
+          //  AppDomain.CurrentDomain.ProcessExit += new EventHandler(Application_ApplicationExit);
+
         }
+
+        void clearEventHandlers()
+        {
+            xmlStation.AgentGetStateReturn -= XmlStation_AgentGetStateReturn;
+            Application.ApplicationExit -= new EventHandler(Application_ApplicationExit);
+           // AppDomain.CurrentDomain.ProcessExit -= new EventHandler(Application_ApplicationExit);
+        }
+        
 
         void Application_ApplicationExit(object sender, EventArgs e)
         {
             log.Info("Exited Voice Handling Application.");
+            disconnect();
+            clearEventHandlers();
             Environment.Exit(0);
         }
 
-       
+        void disconnect()
+        {
+            //Logs off Agent if Agent is in Logged in state.
+            if (agent_state == AgentState.agentLoggedOn || agent_state == AgentState.agentReady || agent_state == AgentState.agentNotReady || agent_state == AgentState.agentWorkingAfterCall)
+            {
+                xmlClient.CSTASetAgentState(new CSTADeviceID(Program.globalCom.stationDN.Trim(), enDeviceIDType.deviceNumber), enReqAgentState.loggedOff, Program.globalCom.agentID.Trim(), Program.globalCom.agentPassword.Trim(), null, null);
+            }
+
+            //Stops Monitor initiated before.
+            if (monitor_state == MonitorState.MonitorStart)
+            {
+                xmlClient.CSTAMonitorStop(xmlClient.CSTAMonitorList[0]);
+            }
+
+            err = xmlClient.Disconnect();
+            if (err.ToString().Equals("NoError"))
+            {
+                //rtbStatus.Text = "Disconnected.";
+                log.Info("Server Disconnected");
+                connectionState = Connection.Disconnect;
+                
+                ConnectionDisconnected();
+                log.Info("Exited AgentLoginApplication");
+            }
+            //else
+            //    rtbStatus.Text = err.ToString();
+        }
+
+
 
 
     }
