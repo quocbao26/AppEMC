@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(VoiceCallForm));
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.btnLogout = new System.Windows.Forms.Button();
@@ -44,13 +45,18 @@
             this.btnTransfer = new System.Windows.Forms.Button();
             this.btnKeyBoard = new System.Windows.Forms.Button();
             this.txtStatus = new System.Windows.Forms.TextBox();
-            this.textBox2 = new System.Windows.Forms.TextBox();
-            this.textBox3 = new System.Windows.Forms.TextBox();
-            this.lbAgentID = new System.Windows.Forms.Label();
+            this.txtIncoming = new System.Windows.Forms.TextBox();
+            this.txtbDialNumber = new System.Windows.Forms.TextBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.lbAgtName = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.lblStation = new System.Windows.Forms.ToolStripLabel();
+            this.lblCallTimer = new System.Windows.Forms.Label();
+            this.lblHoldTimer = new System.Windows.Forms.Label();
+            this.lbAgentID = new System.Windows.Forms.ToolStripLabel();
+            this.callTimer = new System.Windows.Forms.Timer(this.components);
+            this.holdTimer = new System.Windows.Forms.Timer(this.components);
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -112,6 +118,7 @@
             this.btnHold.Size = new System.Drawing.Size(56, 47);
             this.btnHold.TabIndex = 4;
             this.btnHold.UseVisualStyleBackColor = true;
+            this.btnHold.Click += new System.EventHandler(this.btnHold_Click);
             // 
             // btnDrop
             // 
@@ -122,6 +129,7 @@
             this.btnDrop.Size = new System.Drawing.Size(56, 47);
             this.btnDrop.TabIndex = 3;
             this.btnDrop.UseVisualStyleBackColor = true;
+            this.btnDrop.Click += new System.EventHandler(this.btnDrop_Click);
             // 
             // btnPlaceCall
             // 
@@ -132,6 +140,7 @@
             this.btnPlaceCall.Size = new System.Drawing.Size(56, 47);
             this.btnPlaceCall.TabIndex = 2;
             this.btnPlaceCall.UseVisualStyleBackColor = true;
+            this.btnPlaceCall.Click += new System.EventHandler(this.btnPlaceCall_Click);
             // 
             // groupBox3
             // 
@@ -216,31 +225,21 @@
             this.txtStatus.TabIndex = 5;
             this.txtStatus.Text = " Logged Off";
             // 
-            // textBox2
+            // txtIncoming
             // 
-            this.textBox2.Location = new System.Drawing.Point(360, 51);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.ReadOnly = true;
-            this.textBox2.Size = new System.Drawing.Size(139, 22);
-            this.textBox2.TabIndex = 6;
+            this.txtIncoming.Location = new System.Drawing.Point(360, 51);
+            this.txtIncoming.Name = "txtIncoming";
+            this.txtIncoming.ReadOnly = true;
+            this.txtIncoming.Size = new System.Drawing.Size(139, 22);
+            this.txtIncoming.TabIndex = 6;
             // 
-            // textBox3
+            // txtbDialNumber
             // 
-            this.textBox3.Location = new System.Drawing.Point(360, 79);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.ReadOnly = true;
-            this.textBox3.Size = new System.Drawing.Size(139, 22);
-            this.textBox3.TabIndex = 7;
-            // 
-            // lbAgentID
-            // 
-            this.lbAgentID.AutoSize = true;
-            this.lbAgentID.Location = new System.Drawing.Point(375, 127);
-            this.lbAgentID.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.lbAgentID.Name = "lbAgentID";
-            this.lbAgentID.Size = new System.Drawing.Size(69, 17);
-            this.lbAgentID.TabIndex = 8;
-            this.lbAgentID.Text = "lbAgentID";
+            this.txtbDialNumber.Location = new System.Drawing.Point(360, 79);
+            this.txtbDialNumber.Name = "txtbDialNumber";
+            this.txtbDialNumber.ReadOnly = true;
+            this.txtbDialNumber.Size = new System.Drawing.Size(139, 22);
+            this.txtbDialNumber.TabIndex = 7;
             // 
             // panel1
             // 
@@ -256,33 +255,77 @@
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.lbAgtName,
-            this.toolStripSeparator1});
+            this.toolStripSeparator1,
+            this.lblStation,
+            this.lbAgentID});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(569, 25);
             this.toolStrip1.TabIndex = 0;
             this.toolStrip1.Text = "toolStrip1";
             // 
+            // lbAgtName
+            // 
+            this.lbAgtName.Name = "lbAgtName";
+            this.lbAgtName.Size = new System.Drawing.Size(90, 22);
+            this.lbAgtName.Text = "lblAgtName";
+            // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
             // 
-            // lbAgtName
+            // lblStation
             // 
-            this.lbAgtName.Name = "lbAgtName";
-            this.lbAgtName.Size = new System.Drawing.Size(111, 22);
-            this.lbAgtName.Text = "toolStripLabel1";
+            this.lblStation.Margin = new System.Windows.Forms.Padding(0, 0, 0, 0);
+            this.lblStation.Name = "lblStation";
+            this.lblStation.Size = new System.Drawing.Size(73, 25);
+            this.lblStation.Text = "lblStation";
+            // 
+            // lblCallTimer
+            // 
+            this.lblCallTimer.AutoSize = true;
+            this.lblCallTimer.Location = new System.Drawing.Point(357, 127);
+            this.lblCallTimer.Name = "lblCallTimer";
+            this.lblCallTimer.Size = new System.Drawing.Size(81, 17);
+            this.lblCallTimer.TabIndex = 11;
+            this.lblCallTimer.Text = "lblCallTimer";
+            // 
+            // lblHoldTimer
+            // 
+            this.lblHoldTimer.AutoSize = true;
+            this.lblHoldTimer.Location = new System.Drawing.Point(453, 127);
+            this.lblHoldTimer.Name = "lblHoldTimer";
+            this.lblHoldTimer.Size = new System.Drawing.Size(87, 17);
+            this.lblHoldTimer.TabIndex = 12;
+            this.lblHoldTimer.Text = "lblHoldTimer";
+            // 
+            // lbAgentID
+            // 
+            this.lbAgentID.Name = "lbAgentID";
+            this.lbAgentID.Size = new System.Drawing.Size(77, 22);
+            this.lbAgentID.Text = "lbAgentID";
+            // 
+            // callTimer
+            // 
+            this.callTimer.Interval = 1000;
+            this.callTimer.Tick += new System.EventHandler(this.callTimer_Tick);
+            // 
+            // holdTimer
+            // 
+            this.holdTimer.Interval = 1000;
+            this.holdTimer.Tick += new System.EventHandler(this.holdTimer_Tick);
             // 
             // VoiceCallForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(569, 216);
+            this.Controls.Add(this.lblHoldTimer);
+            this.Controls.Add(this.lblCallTimer);
             this.Controls.Add(this.panel1);
-            this.Controls.Add(this.lbAgentID);
-            this.Controls.Add(this.textBox3);
-            this.Controls.Add(this.textBox2);
+            this.Controls.Add(this.txtbDialNumber);
+            this.Controls.Add(this.txtIncoming);
             this.Controls.Add(this.txtStatus);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
@@ -310,8 +353,8 @@
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.TextBox txtStatus;
-        private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.TextBox textBox3;
+        private System.Windows.Forms.TextBox txtIncoming;
+        private System.Windows.Forms.TextBox txtbDialNumber;
         private System.Windows.Forms.Button btnHold;
         private System.Windows.Forms.Button btnDrop;
         private System.Windows.Forms.Button btnPlaceCall;
@@ -322,10 +365,15 @@
         private System.Windows.Forms.Button btnLogin;
         private System.Windows.Forms.Button btnAux;
         private System.Windows.Forms.Button btnAvailable;
-        private System.Windows.Forms.Label lbAgentID;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripLabel lbAgtName;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripLabel lblStation;
+        private System.Windows.Forms.ToolStripLabel lbAgentID;
+        private System.Windows.Forms.Label lblCallTimer;
+        private System.Windows.Forms.Label lblHoldTimer;
+        private System.Windows.Forms.Timer callTimer;
+        private System.Windows.Forms.Timer holdTimer;
     }
 }

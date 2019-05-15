@@ -95,7 +95,7 @@ namespace VoiceCallApplication
         {
             cmbServerLink.Text = cmbServerLink.Items[0].ToString();
             btnConnect.Enabled = true;
-            btnConnect.Text = "Connect";
+            
         }
 
         void xmlClient_XMLEnumerateServicesReturned(object sender, XMLEnumerateServicesReturnedEventArgs arg)
@@ -243,20 +243,9 @@ namespace VoiceCallApplication
         //Connection Established
         private void ConnectionEstablished()
         {
-            lblAgentID.Enabled = true;
-            lblAgentPassword.Enabled = true;
-            lblStationID.Enabled = true;
-            txtbStationID.Enabled = true;
-            txtbAgentID.Enabled = true;
-            txtbAgentPassword.Enabled = true;
-            //btnMonitorStart.Enabled = true;
-            btnConnect.Enabled = false;
             Program.globalCom.Connected = true;
-            
-            this.Visible = false;
-            //myToolTip.SetToolTip(btnConnect, "Disconnect from XML Server");
-            //gbAgentDetails.Enabled = true;
-
+            this.Close();
+           
         }
 
        

@@ -122,77 +122,11 @@ namespace VoiceCallApplication
 
 
 
-        //Agent Not Ready
-        private void AgentNotReady()
-        {
-            Image img = Image.FromFile(@"..\..\Resources\images\logout.png");
-            //btnLogin.Image = img;
-            myToolTip.SetToolTip(btnConnect, "Agent Logout");
-            //btnAux.Enabled = false;
-            //btnACW.Enabled = true;
-            //btnAvailable.Enabled = true;
-        }
+     
 
-        //Agent Ready
-        private void AgentReady()
-        {
-            Image img = Image.FromFile(@"..\..\Resources\images\logout.png");
-            //btnLogin.Image = img;
-            myToolTip.SetToolTip(btnConnect, "Agent Logout");
-            //btnAvailable.Enabled = false;
-            //btnAux.Enabled = true;
-            //btnACW.Enabled = true;
-        }
+       
 
-        //Agent Working After Call
-        private void AgentWorkingAfterCall()
-        {
-            Image img = Image.FromFile(@"..\..\Resources\images\logout.png");
-            //btnLogin.Image = img;
-            myToolTip.SetToolTip(btnConnect, "Agent Logout");
-            //btnACW.Enabled = false;
-            //btnAux.Enabled = true;
-            //btnAvailable.Enabled = true;
-        }
 
-        void xmlClient_CSTAAgentWorkingAfterCall(object sender, CSTAAgentWorkingAfterCallEventArgs arg)
-        {
-            //rtbStatus.Text = "Agent in ACW state";
-            log.Info("Agent State : ACW");
-            agent_state = AgentState.agentWorkingAfterCall;
-            AgentWorkingAfterCall();
-        }
-
-        void xmlClient_CSTAAgentNotReady(object sender, CSTAAgentNotReadyEventArgs arg)
-        {
-            //rtbStatus.Text = "Agent in Aux Sate";
-            log.Info("Agent State : Aux");
-            agent_state = AgentState.agentNotReady;
-            AgentNotReady();
-        }
-
-        void xmlClient_CSTAAgentReady(object sender, CSTAAgentReadyEventArgs arg)
-        {
-          //KeyDown=  rtbStatus.Text = "Agent is in Available State";
-            log.Info("Agent State : Available");
-            agent_state = AgentState.agentReady;
-            AgentReady();
-        }
-
-        //Sets/Channges Agent state to Available.
-        private void btnAvailable_Click(object sender, EventArgs e)
-        {
-            xmlClient.CSTASetAgentState(new CSTADeviceID(txtbStationID.Text.Trim(), enDeviceIDType.deviceNumber), enReqAgentState.ready, txtbAgentID.Text.Trim(), txtbAgentPassword.Text.Trim(), null, null);
-        }
-
-        private void btnAux_Click(object sender, EventArgs e)
-        {
-            xmlClient.CSTASetAgentState(new CSTADeviceID(txtbStationID.Text.Trim(), enDeviceIDType.deviceNumber), enReqAgentState.notReady, txtbAgentID.Text.Trim(), txtbAgentPassword.Text.Trim(), null, null);
-        }
-
-        private void btnACW_Click(object sender, EventArgs e)
-        {
-            xmlClient.CSTASetAgentState(new CSTADeviceID(txtbStationID.Text.Trim(), enDeviceIDType.deviceNumber), enReqAgentState.workingAfterCall, txtbAgentID.Text.Trim(), txtbAgentPassword.Text.Trim(), null, null);
-        }
+      
     }
 }

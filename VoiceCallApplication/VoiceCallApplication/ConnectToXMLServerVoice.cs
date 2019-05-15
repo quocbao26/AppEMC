@@ -33,33 +33,33 @@ namespace VoiceCallApplication
 
         }
 
-        private void AgentLoggenOn()
-        {
-            //Image img = Image.FromFile(@"..\..\Resources\images\logout.png");
-            btnAvailable.Enabled = true;
-            btnLogout.Enabled = true;
-            //btnACW.Enabled = true;
-            //btnLogin.Image = img;
+        //private void AgentLoggenOn()
+        //{
+        //    //Image img = Image.FromFile(@"..\..\Resources\images\logout.png");
+        //    btnAvailable.Enabled = true;
+        //    btnLogout.Enabled = true;
+        //    //btnACW.Enabled = true;
+        //    //btnLogin.Image = img;
 
-        }
+        //}
 
-        // huy
-        void xmlClient_CSTAAgentLoggedOn(object sender, CSTAAgentLoggedOnEventArgs arg)
-        {
-            //rtbStatus.Text = "Agent Logged On";
-            log.Info("Agent  " + arg.AgentID + " Logged On");
-            agent_state = AgentState.agentLoggedOn;
-            AgentLoggenOn();
-            xmlClient.CSTAGetAgentState(new CSTADeviceID(lbAgentID.Text.Trim(), enDeviceIDType.deviceNumber));
-        }
+        //// huy
+        //void xmlClient_CSTAAgentLoggedOn(object sender, CSTAAgentLoggedOnEventArgs arg)
+        //{
+        //    //rtbStatus.Text = "Agent Logged On";
+        //    log.Info("Agent  " + arg.AgentID + " Logged On");
+        //    agent_state = AgentState.agentLoggedOn;
+        //    AgentLoggenOn();
+        //    xmlClient.CSTAGetAgentState(new CSTADeviceID(lbAgentID.Text.Trim(), enDeviceIDType.deviceNumber));
+        //}
 
         private void XmlStation_AgentGetStateReturn(object sender, AgentGetStateReturnEventArgs arg)
         {
             var agent = arg.AgentReturned;
             var state = agent.AgentState;
 
-            lbAgentID.Text = agent.AgentID;
-            lbAgtName.Text = agent.AgentName;
+            lbAgentID.Text = "ID: " + agent.AgentID;
+            lbAgtName.Text = "Name: " + agent.AgentName;
             log.Debug("-- Agent State :"+state.ToString());
 
             if (state == enStationAgentState.agentNotReady)
@@ -211,14 +211,24 @@ namespace VoiceCallApplication
             txtStatus.Text = "Logged On";
             //btnACW.Enabled = true;
             btnAvailable.Enabled = true;
+            lblStation.Text = "Station: " + Program.globalCom.stationDN;
         }
 
         private void AgentReady()
         {
             btnAvailable.Enabled = false;
             txtStatus.Text = "Avaiable";
-
+            btnPlaceCall.Enabled = true;
+            btnDrop.Enabled = false;
+            btnHold.Enabled = false;
+            btnTransfer.Enabled = false;
+            btnConference.Enabled = false;
+            txtbDialNumber.ReadOnly = false;
+            txtIncoming.Clear();
+            callTimer.Stop();
+            holdTimer.Stop();
+            lblCallTimer.Text = "";
+            lblHoldTimer.Text = "";
         }
-
     }
 }

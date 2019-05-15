@@ -89,6 +89,18 @@ namespace VoiceCallApplication
         };
         Consult_Type _type;
 
+        enum enCallState
+        {
+            Idle = 0,
+            Connecting = 1,
+            Alerting = 2,
+            Connected = 3,
+            Hold = 4,
+            Queued = 5,
+            Failed = 6
+        }
+
+
         private void btnAux_Click(object sender, EventArgs e)
         {
 
@@ -100,6 +112,9 @@ namespace VoiceCallApplication
 
         public VoiceCallForm()
         {
+            // prevent user from changing form size
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
             xmlClient = new ASXMLClient();
             
             //Initializes a new instance of AgileSoftware.Developer.ASXMLClient class. 
@@ -133,6 +148,17 @@ namespace VoiceCallApplication
             disconnect();
             txtStatus.Text = "Logged Off";
             btnAvailable.Enabled = false;
+            btnHold.Enabled = false;
+            lblStation.Text = "";
+            btnDrop.Enabled = false;
+            btnPlaceCall.Enabled = false;
+            btnAux.Enabled = false;
+            txtbDialNumber.ReadOnly = true;
+            callTimer.Stop();
+            holdTimer.Stop();
+            lblCallTimer.Text = "";
+            lblHoldTimer.Text = "";
+            txtIncoming.Clear();
             
         }
 
@@ -144,15 +170,104 @@ namespace VoiceCallApplication
                     return f;
             return null;
         }
+
+        public static bool checkNum(string _no)
+        {
+            int no;
+            bool isNum = int.TryParse(_no, out no);
+            if (isNum)
+                return true;
+            else
+                return false;
+        }
+
+        private void btnPlaceCall_Click(object sender, EventArgs e)
+        {
+            //Make Call
+            if (call_type == CallType.MakeCall)
+            {
+                if (txtbDialNumber.Text.Length <= 0)
+                {
+                    MessageBox.Show("Enter valid Station ID", "Station ID", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else
+                {
+                    bool is_Station = checkNum(txtbDialNumber.Text.Trim());
+                    if (is_Station)
+                    {
+                        string CallToNumber = txtbDialNumber.Text.Trim();
+                        xmlStation.CallDial(CallToNumber, "");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Invalid Station ID.", "Station ID", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+
+            //Answer Call
+            if (call_type == CallType.AnswerCall)
+            {
+                xmlStation.CallAnswer();
+            }
+        }
+
+        
+
+        private void btnDrop_Click(object sender, EventArgs e)
+        {
+            xmlStation.CallRelease();
+        }
+
+        private void btnHold_Click(object sender, EventArgs e)
+        {
+            StationCall objStationCall = xmlStation.GetCallByCallID(incoming_call_id);
+            if (objStationCall != null)
+            {
+                if ((int)objStationCall.CallState == (int)enCallState.Connecting || (int)objStationCall.CallState == (int)enCallState.Alerting || (int)objStationCall.CallState == (int)enCallState.Connected)
+                {
+                    callAnswered = false;
+                    xmlStation.CallHold(objStationCall);
+                }
+                if ((int)objStationCall.CallState == (int)enCallState.Hold)
+                {
+                    xmlStation.CallUnhold();
+                    holdTimer.Stop();
+                    log.Info("--End hold between: " + objStationCall.CallerDN + " and " + objStationCall.CalledDN + " Duration: " + lblHoldTimer.Text);
+
+                }
+            }
+        }
+
+        private void holdTimer_Tick(object sender, EventArgs e)
+        {
+            hold_time = hold_time + 1;
+            sec = hold_time % 60;
+            min = ((hold_time - sec) / 60) % 60;
+            hr = ((hold_time - (sec + (min * 60))) / 3600) % 60;
+            lblHoldTimer.Text = hr.ToString() + ":" + min.ToString() + ":" + sec.ToString();
+        }
+
+        private void callTimer_Tick(object sender, EventArgs e)
+        {
+            time = time + 1;
+            sec = time % 60;
+            min = ((time - sec) / 60) % 60;
+            hr = ((time - (sec + (min * 60))) / 3600) % 60;
+            lblCallTimer.Text = hr.ToString() + ":" + min.ToString() + ":" + sec.ToString();
+        }
+
+       
+
         private void btnLogin_Click(object sender, EventArgs e)
         {
             Program.globalCom.xmlClient = xmlClient;
             Program.globalCom.xmlStation = xmlStation;
-            //Form frm = this.CheckExists(typeof(SettingConfigForm));
+            Form frm = this.CheckExists(typeof(SettingConfigForm));
 
-            if (f != null)
+            if (frm != null)
             {
-                f.Activate();
+                frm.Visible = true;
             }
             else
             {
@@ -208,8 +323,9 @@ namespace VoiceCallApplication
             //xmlClient.CSTAAgentLoggedOn += new CSTAAgentLoggedOnEventHandler(xmlClient_CSTAAgentLoggedOn);
 
 
-
-
+            xmlStation.StationCallChanged += XmlStation_StationCallChanged;
+            
+            
 
             //xmlClient.CSTAAgentLoggedOff += new CSTAAgentLoggedOffEventHandler(xmlClient_CSTAAgentLoggedOff);
             //xmlClient.CSTAAgentReady += new CSTAAgentReadyEventHandler(xmlClient_CSTAAgentReady);
@@ -235,6 +351,84 @@ namespace VoiceCallApplication
 
             Application.ApplicationExit += new EventHandler(Application_ApplicationExit);
           //  AppDomain.CurrentDomain.ProcessExit += new EventHandler(Application_ApplicationExit);
+
+        }
+
+        private void XmlStation_StationCallChanged(object sender, StationCallChangedEventArgs arg)
+        {
+            /* string station = arg.StationCall.CallConnection.DeviceID.ID;*/ // may hien tai
+            //string a = arg.StationCall.CallAppearance.ToString();
+            string b = arg.StationCall.CallerDN; // nguoi goi
+            string c = arg.StationCall.CalledDN; // nguoi nghe
+            string d = arg.StationCall.CallState.ToString();
+            //string w = arg.StationCall.CallEvents[0].ToString();
+            string e = arg.StationCall.CallDirection.ToString(); // huong goi vao
+            //string r = arg.StationCall.CallMembers[0].ToString();
+
+            //co cuoc goi toi
+            switch ((int)arg.StationCall.CallState)
+            {
+                // thong bao
+                case (int)enCallState.Alerting:
+                    incoming_call_id = arg.StationCall.CallConnection.CallID.ToString();
+                    txtIncoming.Text = "Incoming: " + arg.StationCall.CallerDN;
+                    txtStatus.Text = "Ringing";
+                    log.Info("--Call Recieved from: " + arg.StationCall.CallerDN + " to " + arg.StationCall.CalledDN);
+                    call_type = CallType.AnswerCall;
+
+
+                    btnPlaceCall.Enabled = true;
+                    btnDrop.Enabled = true;
+                    btnHold.Enabled = false;
+                    btnTransfer.Enabled = false;
+                    btnConference.Enabled = false;
+                    break;
+
+                // bat may
+                case (int)enCallState.Connected:
+                    txtStatus.Text = "Connected";
+                    log.Info("--Having conversation between: " + arg.StationCall.CallerDN + " and " + arg.StationCall.CalledDN);
+
+                    callTimer.Start();
+                    btnPlaceCall.Enabled = false;
+                    btnDrop.Enabled = true;
+                    btnHold.Enabled = true;
+                    btnTransfer.Enabled = true;
+                    btnConference.Enabled = true;
+                    break;
+
+                // cup may
+                case (int)enCallState.Idle:
+                    log.Info("--End conversation between: " + arg.StationCall.CallerDN + " and " + arg.StationCall.CalledDN + "\n Duration: " + lblCallTimer.Text);
+                    xmlStation.AgentSetState(enReqAgentState.ready, comm.agentID, comm.agentPassword, enWorkMode.WM_AUTO_IN, 0);
+                    break;
+
+                // goi di
+                case (int)enCallState.Connecting:
+                    incoming_call_id = arg.StationCall.CallConnection.CallID.ToString();
+                    txtStatus.Text = "Connecting";
+                    log.Info("--Is connecting with: " + arg.StationCall.CalledDN);
+
+
+                    btnPlaceCall.Enabled = false;
+                    btnDrop.Enabled = true;
+                    btnHold.Enabled = false;
+                    btnTransfer.Enabled = false;
+                    btnConference.Enabled = false;
+                    txtIncoming.Text = "Out-going: " + arg.StationCall.CalledDN;
+                    txtbDialNumber.Clear();
+                    break;
+                // hold
+                case (int)enCallState.Hold:
+                    holdTimer.Start();
+                    callTimer.Stop();
+                    txtStatus.Text = "Holding";
+                    log.Info("--Hold conversation between: " + arg.StationCall.CallerDN + " and " + arg.StationCall.CalledDN);
+                    break;
+            }
+            
+            
+
 
         }
 

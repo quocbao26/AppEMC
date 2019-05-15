@@ -96,7 +96,9 @@ namespace VoiceCallApplication
 
         public SettingConfigForm()
         {
-            
+            // prevent user from changing form size
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
 
             xmlClient = Program.globalCom.xmlClient;
             //Initializes a new instance of AgileSoftware.Developer.ASXMLClient class. 
